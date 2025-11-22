@@ -163,14 +163,7 @@ const ChatView = ({ initialIdea }: any) => {
               : "New Analysis"}
             <div className="text-xs text-slate-500 mt-1">Just now</div>
           </div>
-          <div className="hover:bg-slate-900 text-slate-400 hover:text-slate-200 p-3 rounded-lg text-sm cursor-pointer transition-colors">
-            Subscription Coffee App
-            <div className="text-xs text-slate-600 mt-1">2 days ago</div>
-          </div>
-          <div className="hover:bg-slate-900 text-slate-400 hover:text-slate-200 p-3 rounded-lg text-sm cursor-pointer transition-colors">
-            AI Legal Assistant
-            <div className="text-xs text-slate-600 mt-1">5 days ago</div>
-          </div>
+        
         </div>
         <div className="p-4 border-t border-slate-800">
           <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-violet-400 transition-colors w-full">

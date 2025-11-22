@@ -16,6 +16,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const App = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -80,12 +81,15 @@ const App = () => {
             <a href="#" className="hover:text-white transition-colors">
               Pricing
             </a>
-            <button className="text-white px-5 py-2.5 rounded-full border border-slate-700 hover:border-violet-500 transition-all">
+            {/* <button className="text-white px-5 py-2.5 rounded-full border border-slate-700 hover:border-violet-500 transition-all">
               Log in
-            </button>
-            <button className="bg-white text-slate-950 px-5 py-2.5 rounded-full font-semibold hover:bg-violet-50 transition-colors">
+            </button> */}
+            <Link
+              href={"/chat"}
+              className="bg-white text-slate-950 px-5 py-2.5 rounded-full font-semibold hover:bg-violet-50 transition-colors"
+            >
               Start Validating
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
