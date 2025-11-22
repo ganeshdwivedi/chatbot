@@ -160,7 +160,7 @@ const App = () => {
               />
               <button
                 onClick={() => {
-                  router.push(`/chat?text=${encodeURIComponent(ideaInput)}`);
+                  router.push(`/chat`);
                 }}
                 className="hidden cursor-pointer md:flex items-center gap-2 bg-white text-slate-950 hover:bg-slate-200 px-6 py-3 rounded-lg font-bold transition-all"
               >
@@ -391,8 +391,8 @@ const App = () => {
                       <Users size={14} />
                     </div>
                     <div className="bg-slate-800 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl p-4 text-sm text-slate-300 max-w-[90%]">
-                      I&apos;m worried that the market for "Luxury Cat Hotels"
-                      is too small. Can you check saturation?
+                      I&apos;m worried that the market for Luxury Cat Hotels is
+                      too small. Can you check saturation?
                     </div>
                   </div>
                   <div className="flex items-start gap-3 flex-row-reverse">
@@ -404,8 +404,8 @@ const App = () => {
                         Analysis Complete.
                       </p>
                       High saturation in urban centers (NYC, LA). However,
-                      search volume for "premium pet boarding" is up 45% YoY.
-                      Recommend pivoting to "Tech-enabled Pet Sitting" to reduce
+                      search volume for premium pet boarding is up 45% YoY.
+                      Recommend pivoting to Tech-enabled Pet Sitting to reduce
                       overhead.
                     </div>
                   </div>

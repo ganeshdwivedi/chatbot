@@ -19,7 +19,7 @@ export default function InterviewChat({
 
   async function sendMessage() {
     if (!input.trim()) return;
-    const userMessage = { role: "user" as "user", content: input };
+    const userMessage = { role: "user", content: input } as const;
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
