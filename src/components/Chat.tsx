@@ -18,6 +18,7 @@ export default function InterviewChat({
   const [input, setInput] = useState("");
 
   async function sendMessage() {
+    if (!input.trim()) return;
     const userMessage = { role: "user" as "user", content: input };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
@@ -134,7 +135,9 @@ export default function InterviewChat({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onPressEnter={sendMessage}
+            onPressEnter={() => {
+              if (input.trim()) sendMessage();
+            }}
             placeholder="Type your answer..."
             className="flex-1 w-full !px-4 !py-3 border border-gray-300 !rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
