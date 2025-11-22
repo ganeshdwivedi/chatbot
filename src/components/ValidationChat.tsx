@@ -35,7 +35,7 @@ const ChatView = ({ initialIdea }: any) => {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const searchParams = useSearchParams();
+  
 
   // Simulated Analysis State
   const [metrics, setMetrics] = useState({
