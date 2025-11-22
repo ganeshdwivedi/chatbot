@@ -163,14 +163,13 @@ const ChatView = ({ initialIdea }: any) => {
               : "New Analysis"}
             <div className="text-xs text-slate-500 mt-1">Just now</div>
           </div>
-        
         </div>
         <div className="p-4 border-t border-slate-800">
           <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-violet-400 transition-colors w-full">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 to-blue-500 flex items-center justify-center text-white font-bold">
-              JS
+              G
             </div>
-            <span>John Smith</span>
+            <span>Gues</span>
           </button>
         </div>
       </div>
