@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# ... other ignored files
+
+# Google Cloud Credentials
+gcloud-credentials.json
