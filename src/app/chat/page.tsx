@@ -1,4 +1,3 @@
-import InterviewChat from "@/components/Chat";
 import ChatView from "@/components/ValidationChat";
 import React from "react";
 
