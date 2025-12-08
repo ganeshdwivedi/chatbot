@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 
-const page = () => {
+const Page = () => {
   const { register } = useForm();
   const router = useRouter();
 
@@ -77,7 +77,7 @@ const page = () => {
         </form>
 
         <p className="text-center mt-6 text-sm text-slate-400">
-          Don't have an account?
+          Don&apos;t have an account?
           <Link
             href="/auth/register"
             className="text-violet-400 hover:text-violet-300 font-medium hover:underline"
@@ -90,4 +90,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

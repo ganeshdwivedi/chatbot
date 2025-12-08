@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-const page = () => {
+const Page = () => {
   const router = useRouter();
   return (
     <div className="min-h-screen bg-slate-950 pt-20 selection:!bg-violet-500 selection:text-white font-sans flex items-center justify-center relative overflow-hidden px-4">
@@ -95,4 +95,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

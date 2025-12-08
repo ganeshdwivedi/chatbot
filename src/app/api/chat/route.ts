@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       );
     }
 
-    let MainChat = await chat.findById(chatId);
+    const MainChat = await chat.findById(chatId);
 
     if (!MainChat) {
       return NextResponse.json(
