@@ -2,28 +2,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   Rocket,
-  BarChart2,
-  Target,
-  ShieldCheck,
-  Zap,
   TrendingUp,
   Users,
-  Menu,
   X,
-  ArrowRight,
   CheckCircle2,
-  Search,
-  BrainCircuit,
-  Globe,
-  MessageSquare,
   MoreHorizontal,
   FileText,
   Download,
   Share2,
   Send,
   Bot,
-  ChevronRight,
-  PieChart,
   Activity,
   Lock,
   AlertCircle,
@@ -33,6 +21,8 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { sanitizeMarkdown } from "./sanitizeString";
+import { useParams, useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 
 // Custom Markdown Renderer Component
 const ValidationMarkdown = ({ content }: { content: string }) => {
@@ -301,18 +291,14 @@ const ValidationMarkdown = ({ content }: { content: string }) => {
 };
 
 const ChatView = ({ initialIdea }: any) => {
-  const [messages, setMessages] = useState<any[]>([
-    {
-      id: 1,
-      type: "ai",
-      text: "Hello! I'm Valid8r. What startup idea would you like to stress-test today?",
-    },
-  ]);
-  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<any[]>([]);
+  const { register, watch, setValue } = useForm();
+  const { input } = watch();
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
+  const router = useRouter();
+  const { ChatId } = useParams();
   // Simulated Analysis State
   const [metrics, setMetrics] = useState({
     score: 0,
@@ -322,22 +308,17 @@ const ChatView = ({ initialIdea }: any) => {
   });
 
   useEffect(() => {
-    if (initialIdea) {
-      addMessage({
-        id: 1,
-        type: "user",
-        text: `Validate my idea: ${initialIdea}`,
-      });
-      sendMessageToAPI(initialIdea);
-    }
-  }, []);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
+  useEffect(() => {
+    if (ChatId) {
+      getAllMessagesOfChat();
+    }
+  }, [ChatId]);
+
   const addMessage = (msg: any) => {
-    setMessages((prev: any) => [...prev, msg]);
+    setMessages((prev: any) => [...(prev || []), msg]);
   };
 
   // Check if message is a validation report
@@ -345,10 +326,47 @@ const ChatView = ({ initialIdea }: any) => {
     return text.includes("# Verdict:") && text.includes("## Explanation");
   };
 
+  const getAllMessagesOfChat = async () => {
+    try {
+      const response = await fetch(`/api/chat/${ChatId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
+      setMessages(data.data);
+    } catch (error) {
+      console.log(error, "error");
+    }
+  };
+
+  const createChat = async (text: string) => {
+    try {
+      const res = await fetch("/api/chat/create", {
+        method: "POST",
+        body: JSON.stringify({ title: text }),
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json(); // { type: "chatid", id: chatId }
+
+      // Redirect WITHOUT refresh
+      if (data?._id) {
+        sendMessageToAPI(text, data._id);
+        router.push(`/chat/${data._id}`, { scroll: false });
+      }
+    } catch (error) {
+      console.log(error, "error");
+    }
+  };
+
   // API Integration Function
-  const sendMessageToAPI = async (userQuery: string) => {
+  const sendMessageToAPI = async (userQuery: string, chatId?: string) => {
     setIsTyping(true);
     setError(null);
+
+    // Create a temporary message ID for the streaming response
+    const streamingMessageId = Date.now();
+
+    // Add an empty AI message that we'll update as data streams in
 
     try {
       const response = await fetch("/api/chat", {
@@ -356,50 +374,85 @@ const ChatView = ({ initialIdea }: any) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userQuery,
-          conversationHistory: messages.map((m) => ({
-            id: m.id,
-            type: m.type,
-            text: m.text,
-          })),
-          context: {
-            initialIdea: initialIdea || null,
-            currentMetrics: metrics,
-          },
+          chatId: ChatId || chatId,
+          // userId: "user_123",
         }),
       });
-
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-
-      // update metrics if any
-      if (data.metrics) {
-        setMetrics({
-          score: data.metrics.score || metrics.score,
-          tam: data.metrics.tam || metrics.tam,
-          competitors: data.metrics.competitors || metrics.competitors,
-          sentiment: data.metrics.sentiment || metrics.sentiment,
-        });
+      if (!response.body) {
+        throw new Error("No response body (streaming not supported)");
       }
-
-      const aiRawText = data.message;
 
       addMessage({
-        id: Date.now(),
-        type: "ai",
-        text: aiRawText,
-        isValidation: isValidationReport(aiRawText),
+        _id: streamingMessageId,
+        role: "assistant", // Changed from "type" to "role"
+        text: "",
+        isValidation: false,
+      });
+      setIsTyping(false);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+
+      // Read the stream
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        // Decode the chunk
+        const chunk = decoder.decode(value, { stream: true });
+
+        // Split by newlines in case multiple JSON objects come in one chunk
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const parsed = JSON.parse(line);
+
+            // Handle content streaming
+            if (parsed.type === "content" && parsed.text) {
+              accumulatedText += parsed.text;
+
+              updateMessage(streamingMessageId, {
+                text: accumulatedText,
+              });
+            }
+
+            // Handle metrics if your backend sends them
+            if (parsed.metrics) {
+              setMetrics({
+                score: parsed.metrics.score || metrics.score,
+                tam: parsed.metrics.tam || metrics.tam,
+                competitors: parsed.metrics.competitors || metrics.competitors,
+                sentiment: parsed.metrics.sentiment || metrics.sentiment,
+              });
+            }
+          } catch (parseError) {
+            console.warn("Failed to parse streaming data:", parseError, line);
+          }
+        }
+      }
+
+      // Final update - check validation status only once at the end
+      updateMessage(streamingMessageId, {
+        text: accumulatedText,
+        isValidation: isValidationReport(accumulatedText),
       });
     } catch (err) {
-      console.error("API Error:", err);
+      console.error("❌ API Error:", err);
       const message =
         err instanceof Error ? err.message : "Unknown error occurred";
 
-      addMessage({
-        id: Date.now(),
-        type: "ai",
+      // Update the streaming message with error
+      updateMessage(streamingMessageId, {
         text: `Error: ${message}`,
       });
 
@@ -409,46 +462,32 @@ const ChatView = ({ initialIdea }: any) => {
     }
   };
 
+  const updateMessage = (messageId: number, updates: Partial<any>) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg._id === messageId ? { ...msg, ...updates } : msg
+      )
+    );
+  };
+
   const handleSend = () => {
     if (!input.trim() || isTyping) return;
 
-    const newMsg = { id: Date.now(), type: "user", text: input };
+    const newMsg = { _id: Date.now(), role: "user", text: input };
     addMessage(newMsg);
 
     const messageToSend = input;
-    setInput("");
+    setValue("input", "");
 
-    sendMessageToAPI(messageToSend);
+    if (!ChatId) {
+      createChat(messageToSend);
+    } else {
+      sendMessageToAPI(messageToSend);
+    }
   };
 
   return (
-    <div className="flex h-screen pt-20 bg-slate-950 overflow-hidden animate-in fade-in duration-500">
-      {/* Left Sidebar: History */}
-      <div className="hidden lg:flex w-64 flex-col border-r border-slate-800 bg-slate-950/50">
-        <div className="p-4 border-b border-slate-800 flex justify-between items-center">
-          <h3 className="font-semibold text-slate-200">History</h3>
-          <button className="text-slate-400 hover:text-white">
-            <MoreHorizontal size={16} />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          <div className="bg-slate-800/40 text-white p-3 rounded-lg text-sm font-medium cursor-pointer border border-slate-700">
-            {initialIdea
-              ? initialIdea.substring(0, 20) + "..."
-              : "New Analysis"}
-            <div className="text-xs text-slate-500 mt-1">Just now</div>
-          </div>
-        </div>
-        <div className="p-4 border-t border-slate-800">
-          <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-violet-400 transition-colors w-full">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 to-blue-500 flex items-center justify-center text-white font-bold">
-              G
-            </div>
-            <span>Guest</span>
-          </button>
-        </div>
-      </div>
-
+    <>
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col relative bg-slate-950">
         {/* Chat Header */}
@@ -462,7 +501,7 @@ const ChatView = ({ initialIdea }: any) => {
               Live Agent
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <button
               className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
               title="Share"
@@ -472,7 +511,7 @@ const ChatView = ({ initialIdea }: any) => {
             <button className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm transition-colors border border-slate-700">
               <Download size={16} /> Export Report
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Error Banner */}
@@ -490,21 +529,21 @@ const ChatView = ({ initialIdea }: any) => {
 
         {/* Messages Stream */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-          {messages.map((msg: any) => (
+          {messages?.map((msg: any) => (
             <div
-              key={msg.id}
+              key={`${msg?._id}`}
               className={`flex gap-4 ${
-                msg.type === "user" ? "flex-row-reverse" : ""
+                msg?.role === "user" ? "flex-row-reverse" : ""
               }`}
             >
               <div
                 className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
-                  msg?.type === "user"
+                  msg?.role === "user"
                     ? "bg-slate-700 text-slate-300"
                     : "bg-gradient-to-br from-violet-600 to-blue-600 text-white"
                 }`}
               >
-                {msg.type === "user" ? <Users size={16} /> : <Bot size={16} />}
+                {msg.role === "user" ? <Users size={16} /> : <Bot size={16} />}
               </div>
               <div
                 className={`${
@@ -512,7 +551,7 @@ const ChatView = ({ initialIdea }: any) => {
                     ? "w-full max-w-4xl"
                     : "max-w-[85%] sm:max-w-[75%]"
                 } rounded-2xl p-4 sm:p-6 ${
-                  msg.type === "user"
+                  msg?.role === "user"
                     ? "bg-slate-800 text-slate-200 rounded-tr-sm"
                     : "bg-slate-900/50 border border-slate-800 text-slate-300 rounded-tl-sm"
                 }`}
@@ -555,8 +594,7 @@ const ChatView = ({ initialIdea }: any) => {
           <div className="max-w-4xl mx-auto relative">
             <input
               type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              {...register("input", { required: true })}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Ask follow-up questions about market size, competitors, or pricing..."
               className="w-full bg-slate-900 border border-slate-800 text-white rounded-xl pl-4 pr-12 py-4 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-lg placeholder:text-slate-500"
@@ -564,7 +602,7 @@ const ChatView = ({ initialIdea }: any) => {
             />
             <button
               onClick={handleSend}
-              disabled={!input.trim() || isTyping}
+              disabled={!input?.trim() || isTyping}
               className="absolute right-2 top-2 p-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send size={18} />
@@ -580,93 +618,7 @@ const ChatView = ({ initialIdea }: any) => {
       </div>
 
       {/* Right Sidebar: Context & Metrics */}
-      <div className="hidden xl:flex w-80 flex-col border-l border-slate-800 bg-slate-950/50 p-6 space-y-6">
-        <div>
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">
-            Live Context
-          </h3>
-
-          <div className="space-y-4">
-            {/* Score Card */}
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 relative overflow-hidden">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-sm text-slate-400 font-medium">
-                  Viability Score
-                </span>
-                <Activity size={16} className="text-violet-500" />
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">
-                  {metrics.score}
-                </span>
-                <span className="text-sm text-slate-500">/100</span>
-              </div>
-              <div className="mt-2 w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-violet-600 to-blue-500 h-full transition-all duration-1000"
-                  style={{ width: `${metrics.score}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Metric Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-900 rounded-xl p-3 border border-slate-800">
-                <div className="text-xs text-slate-500 mb-1">Est. TAM</div>
-                <div className="text-lg font-semibold text-white">
-                  {metrics.tam}
-                </div>
-              </div>
-              <div className="bg-slate-900 rounded-xl p-3 border border-slate-800">
-                <div className="text-xs text-slate-500 mb-1">Competitors</div>
-                <div className="text-lg font-semibold text-white">
-                  {metrics.competitors}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-              <div className="text-sm text-slate-400 font-medium mb-3">
-                Detected Categories
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 rounded-md bg-slate-800 text-xs text-slate-300 border border-slate-700">
-                  SaaS
-                </span>
-                <span className="px-2 py-1 rounded-md bg-slate-800 text-xs text-slate-300 border border-slate-700">
-                  B2C
-                </span>
-                <span className="px-2 py-1 rounded-md bg-slate-800 text-xs text-slate-300 border border-slate-700">
-                  Gig Economy
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-              <div className="flex justify-between items-center mb-3">
-                <div className="text-sm text-slate-400 font-medium">
-                  Files Generated
-                </div>
-                <FileText size={14} className="text-slate-500" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs text-slate-300 p-2 hover:bg-slate-800 rounded cursor-pointer transition-colors">
-                  <Lock size={12} className="text-violet-400" />{" "}
-                  Business_Plan_Draft.pdf
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-300 p-2 hover:bg-slate-800 rounded cursor-pointer transition-colors">
-                  <Lock size={12} className="text-violet-400" />{" "}
-                  Financial_Model.xlsx
-                </div>
-              </div>
-              <button className="w-full mt-3 py-2 text-xs font-medium text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 rounded-lg transition-colors">
-                Upgrade to Unlock
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 

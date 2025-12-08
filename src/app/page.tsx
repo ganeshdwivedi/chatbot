@@ -40,8 +40,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-violet-500 selection:text-white font-sans overflow-x-hidden">
-      {/* Navbar */}
-
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 overflow-hidden">
         {/* Background Glows */}
@@ -213,7 +211,7 @@ const App = () => {
             </div>
 
             {/* Decor glow */}
-            <div className="absolute -top-20 -right-20 w-64 h-64 bg-violet-600/30 blur-[80px] rounded-full pointer-events-none"></div>
+            <div className="absolute z-10 -top-20 -right-20 w-64 h-64 bg-violet-600/30 blur-[80px] rounded-full pointer-events-none"></div>
           </div>
         </div>
       </section>
