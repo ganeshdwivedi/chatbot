@@ -200,7 +200,7 @@ const ValidationMarkdown = ({ content }: { content: string }) => {
                     )}
                   </div>
                 </div>
-              )
+              ),
             )}
           </div>
         </div>
@@ -281,7 +281,7 @@ const ValidationMarkdown = ({ content }: { content: string }) => {
                     </div>
                   </div>
                 </div>
-              )
+              ),
             )}
           </div>
         </div>
@@ -348,9 +348,9 @@ const ChatView = ({ initialIdea }: any) => {
       });
       const data = await res.json(); // { type: "chatid", id: chatId }
 
-      // Redirect WITHOUT refresh
+      // Send message and WAIT for completion before redirecting
       if (data?._id) {
-        sendMessageToAPI(text, data._id);
+        await sendMessageToAPI(text, data._id); // Add await here
         router.push(`/chat/${data._id}`, { scroll: false });
       }
     } catch (error) {
@@ -358,8 +358,11 @@ const ChatView = ({ initialIdea }: any) => {
     }
   };
 
-  // API Integration Function
-  const sendMessageToAPI = async (userQuery: string, chatId?: string) => {
+  // API Integration Function - Made async and returns Promise
+  const sendMessageToAPI = async (
+    userQuery: string,
+    chatId?: string,
+  ): Promise<void> => {
     setIsTyping(true);
     setError(null);
 
@@ -465,8 +468,8 @@ const ChatView = ({ initialIdea }: any) => {
   const updateMessage = (messageId: number, updates: Partial<any>) => {
     setMessages((prevMessages) =>
       prevMessages.map((msg) =>
-        msg._id === messageId ? { ...msg, ...updates } : msg
-      )
+        msg._id === messageId ? { ...msg, ...updates } : msg,
+      ),
     );
   };
 
@@ -480,7 +483,7 @@ const ChatView = ({ initialIdea }: any) => {
     setValue("input", "");
 
     if (!ChatId) {
-      createChat(messageToSend);
+      createChat(messageToSend); // This now waits for message completion before redirecting
     } else {
       sendMessageToAPI(messageToSend);
     }
