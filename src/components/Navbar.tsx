@@ -35,15 +35,21 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-          <a href="#" className="hover:text-white transition-colors">
+          <Link
+            href={"/features"}
+            className="hover:text-white transition-colors"
+          >
             Features
-          </a>
-          <a href="#" className="hover:text-white transition-colors">
+          </Link>
+          <Link href={"/works"} className="hover:text-white transition-colors">
             How it Works
-          </a>
-          <a href="#" className="hover:text-white transition-colors">
+          </Link>
+          <Link
+            href={"/pricing"}
+            className="hover:text-white transition-colors"
+          >
             Pricing
-          </a>
+          </Link>
           {/* <button className="text-white px-5 py-2.5 rounded-full border border-slate-700 hover:border-violet-500 transition-all">
               Log in
             </button> */}
@@ -69,15 +75,24 @@ const Navbar = () => {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-slate-900 border-b border-slate-800 p-4 flex flex-col gap-4 shadow-2xl">
-          <a href="#" className="text-slate-300 hover:text-white py-2">
+          <Link
+            href={"/features"}
+            className="text-slate-300 hover:text-white py-2"
+          >
             Features
-          </a>
-          <a href="#" className="text-slate-300 hover:text-white py-2">
+          </Link>
+          <Link
+            href={"/works"}
+            className="text-slate-300 hover:text-white py-2"
+          >
             How it Works
-          </a>
-          <a href="#" className="text-slate-300 hover:text-white py-2">
+          </Link>
+          <Link
+            href={"/pricing"}
+            className="text-slate-300 hover:text-white py-2"
+          >
             Pricing
-          </a>
+          </Link>
           <button className="w-full text-center text-white px-5 py-3 rounded-lg border border-slate-700">
             Log in
           </button>
