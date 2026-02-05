@@ -1,8 +1,7 @@
 "use client";
-import ChatSideBar from "@/components/ChatSideBar";
 import ChatView from "@/components/ValidationChat";
 import { useSearchParams } from "next/navigation";
-import React from "react";
+import { Suspense } from "react";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -20,13 +19,15 @@ const Page = () => {
     //   <ChatView />
     // </div>
     // In your page component
-    <ChatView
-      designation={designation}
-      role={role}
-      field={field}
-      experience={experience}
-      difficulty={difficulty}
-    />
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <ChatView
+        designation={designation}
+        role={role}
+        field={field}
+        experience={experience}
+        difficulty={difficulty}
+      />
+    </Suspense>
   );
 };
 

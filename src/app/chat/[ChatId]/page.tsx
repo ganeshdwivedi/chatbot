@@ -3,8 +3,7 @@ import ChatSideBar from "@/components/ChatSideBar";
 import ChatView from "@/components/ValidationChat";
 import { MoreHorizontal } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import React from "react";
-
+import { Suspense } from "react";
 const initialIdea = "NewChat  ";
 const page = () => {
   const searchParams = useSearchParams();
@@ -15,13 +14,15 @@ const page = () => {
   const experience: any = searchParams.get("experience");
   const difficulty: any = searchParams.get("difficulty");
   return (
-    <ChatView
-      designation={designation}
-      role={role}
-      field={field}
-      experience={experience}
-      difficulty={difficulty}
-    />
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <ChatView
+        designation={designation}
+        role={role}
+        field={field}
+        experience={experience}
+        difficulty={difficulty}
+      />
+    </Suspense>
   );
 };
 
