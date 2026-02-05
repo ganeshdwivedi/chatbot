@@ -12,13 +12,6 @@ const Page = () => {
   const experience: any = searchParams.get("experience");
   const difficulty: any = searchParams.get("difficulty");
   return (
-    // <InterviewChat role="junior frontend developer" field="software engineer" />
-    // <div className="flex h-screen pt-20 bg-slate-950 overflow-hidden animate-in fade-in duration-500">
-    //   {/* Left Sidebar: History */}
-    //   <ChatSideBar />
-    //   <ChatView />
-    // </div>
-    // In your page component
     <Suspense fallback={<div>Loading chat...</div>}>
       <ChatView
         designation={designation}
