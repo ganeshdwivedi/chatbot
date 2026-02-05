@@ -1,25 +1,29 @@
+"use client";
+import ChatSideBar from "@/components/ChatSideBar";
 import ChatView from "@/components/ValidationChat";
+import { MoreHorizontal } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+const initialIdea = "NewChat  ";
+const page = () => {
+  const searchParams = useSearchParams();
 
-type PageProps = {
-  searchParams: {
-    designation?: string;
-    role?: string;
-    field?: string;
-    experience?: string;
-    difficulty?: string;
-  };
+  const designation: any = searchParams.get("designation");
+  const role: any = searchParams.get("role");
+  const field: any = searchParams.get("field");
+  const experience: any = searchParams.get("experience");
+  const difficulty: any = searchParams.get("difficulty");
+  return (
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <ChatView
+        designation={designation}
+        role={role}
+        field={field}
+        experience={experience}
+        difficulty={difficulty}
+      />
+    </Suspense>
+  );
 };
 
-export default function Page({ searchParams }: PageProps) {
-  const { designation, role, field, experience, difficulty } = searchParams;
-
-  return (
-    <ChatView
-      designation={designation}
-      role={role}
-      field={field}
-      experience={experience}
-      difficulty={difficulty}
-    />
-  );
-}
+export default page;

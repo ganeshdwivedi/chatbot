@@ -1,27 +1,25 @@
-"use client";
 import ChatView from "@/components/ValidationChat";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 
-const Page = () => {
-  const searchParams = useSearchParams();
-
-  const designation: any = searchParams.get("designation");
-  const role: any = searchParams.get("role");
-  const field: any = searchParams.get("field");
-  const experience: any = searchParams.get("experience");
-  const difficulty: any = searchParams.get("difficulty");
-  return (
-    <Suspense fallback={<div>Loading chat...</div>}>
-      <ChatView
-        designation={designation}
-        role={role}
-        field={field}
-        experience={experience}
-        difficulty={difficulty}
-      />
-    </Suspense>
-  );
+type PageProps = {
+  searchParams: {
+    designation?: string;
+    role?: string;
+    field?: string;
+    experience?: string;
+    difficulty?: string;
+  };
 };
 
-export default Page;
+export default function Page({ searchParams }: PageProps) {
+  const { designation, role, field, experience, difficulty } = searchParams;
+
+  return (
+    <ChatView
+      designation={designation}
+      role={role}
+      field={field}
+      experience={experience}
+      difficulty={difficulty}
+    />
+  );
+}
