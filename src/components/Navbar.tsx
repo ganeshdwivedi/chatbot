@@ -1,19 +1,30 @@
 "use client";
-import { Menu, Rocket, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Menu, X, Mic } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Handle scroll background change
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Navigation handler (replace with router logic if needed)
+  const onNavigate = (section: string) => {
+    const el = document.getElementById(section);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+    setMobileMenuOpen(false);
+  };
 
   return (
     <nav
@@ -24,47 +35,55 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <Link href={"/"} className="flex items-center gap-2 cursor-pointer">
-          <div className="bg-gradient-to-br from-violet-600 to-blue-600 p-2 rounded-lg">
-            <Rocket className="w-6 h-6 text-white" />
+        {/* Logo */}
+        <Link href={"/"}>
+          <div className="flex items-center gap-2 cursor-pointer">
+            <div className="bg-gradient-to-br from-emerald-500 to-cyan-500 p-2 rounded-lg">
+              <Mic className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-white">
+              Intervue<span className="text-emerald-400">.AI</span>
+            </span>
           </div>
-          <span className="text-xl !text-white font-bold tracking-tight">
-            Valid<span className="text-violet-400">8r</span>
-          </span>
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-          <Link
-            href={"/features"}
-            className="hover:text-white transition-colors"
-          >
-            Features
+          <Link href="/features">
+            <button className="hover:text-white transition-colors">
+              Features
+            </button>
           </Link>
-          <Link href={"/works"} className="hover:text-white transition-colors">
-            How it Works
+          <Link href="/works">
+            <button className="hover:text-white transition-colors">
+              Methodology
+            </button>
           </Link>
-          <Link
-            href={"/pricing"}
-            className="hover:text-white transition-colors"
-          >
-            Pricing
+          <Link href="/pricing">
+            <button className="hover:text-white transition-colors">
+              Pricing
+            </button>
           </Link>
-          {/* <button className="text-white px-5 py-2.5 rounded-full border border-slate-700 hover:border-violet-500 transition-all">
+          <Link href="/login">
+            <button className="text-white px-5 py-2.5 rounded-full border border-slate-700 hover:border-emerald-500 transition-all">
               Log in
-            </button> */}
+            </button>
+          </Link>
           <Link
-            href={"/chat"}
-            className="bg-white text-slate-950 px-5 py-2.5 rounded-full font-semibold hover:bg-violet-50 transition-colors"
+            href={
+              "/chat?designation=Frontend&role=Developer&field=React&experience=2&difficulty=medium"
+            }
           >
-            Start Validating
+            <button className="bg-white text-slate-950 px-5 py-2.5 rounded-full font-semibold hover:bg-emerald-50 transition-colors">
+              Start Practicing
+            </button>
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
             className="text-slate-300 hover:text-white"
           >
             {mobileMenuOpen ? <X /> : <Menu />}
@@ -72,33 +91,38 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-slate-900 border-b border-slate-800 p-4 flex flex-col gap-4 shadow-2xl">
-          <Link
-            href={"/features"}
-            className="text-slate-300 hover:text-white py-2"
-          >
-            Features
+        <div className="md:hidden absolute top-full left-0 w-full bg-slate-900 border-b border-slate-800 p-4 flex flex-col gap-4 shadow-2xl animate-in slide-in-from-top-5">
+          <Link href="/features">
+            <button className="text-slate-300 hover:text-white py-2 text-left">
+              Features
+            </button>
+          </Link>
+          <Link href="/works">
+            <button className="text-slate-300 hover:text-white py-2 text-left">
+              Methodology
+            </button>
+          </Link>
+          <Link href="/pricing">
+            <button className="text-slate-300 hover:text-white py-2 text-left">
+              Pricing
+            </button>
+          </Link>
+          <Link href={"/login"}>
+            <button className="w-full text-center text-white px-5 py-3 rounded-lg border border-slate-700">
+              Log in
+            </button>
           </Link>
           <Link
-            href={"/works"}
-            className="text-slate-300 hover:text-white py-2"
+            href={
+              "/chat?designation=Frontend&role=Developer&field=React&experience=2&difficulty=medium"
+            }
           >
-            How it Works
+            <button className="w-full text-center bg-emerald-600 text-white px-5 py-3 rounded-lg font-semibold">
+              Start Practicing
+            </button>
           </Link>
-          <Link
-            href={"/pricing"}
-            className="text-slate-300 hover:text-white py-2"
-          >
-            Pricing
-          </Link>
-          <button className="w-full text-center text-white px-5 py-3 rounded-lg border border-slate-700">
-            Log in
-          </button>
-          <button className="w-full text-center bg-violet-600 text-white px-5 py-3 rounded-lg font-semibold">
-            Start Validating
-          </button>
         </div>
       )}
     </nav>

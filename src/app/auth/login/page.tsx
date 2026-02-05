@@ -27,7 +27,9 @@ const Page = () => {
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            router.push("/chat");
+            router.push(
+              "/chat?designation=Frontend&role=Developer&field=React&experience=2&difficulty=medium",
+            );
           }}
         >
           <div className="space-y-1">
